@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal website of Zeeba Reshamwale - resume, bio-data and contact.">
+    <title>Home | Zeeba Reshamwale</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Apply the saved theme before the page is drawn (avoids a white flash) -->
+    <script>
+        (function () {
+            var mode = "system";
+            try { mode = localStorage.getItem("themeMode") || "system"; } catch (e) {}
+            var dark = mode === "dark" ||
+                (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+            document.documentElement.setAttribute("data-mode", mode);
+            document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+        })();
+    </script>
+</head>
+
+<body>
+
+<!-- ===== Navigation bar ===== -->
+<nav>
+    <a href="index.html" class="logo" aria-label="Zeeba Reshamwale - Home"><span class="logo-mark">ZR</span><span class="logo-text">Zeeba</span></a>
+
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="resume.html">Resume</a></li>
+        <li><a href="biodata.html">Bio-data</a></li>
+        <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <div class="nav-actions">
+        <!-- Theme switcher: Light / System / Dark -->
+        <div class="theme-toggle" role="group" aria-label="Theme">
+            <span class="theme-indicator"></span>
+            <button data-set="light" onclick="setThemeMode('light', event)" title="Light theme" aria-label="Light theme">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </button>
+            <button data-set="system" onclick="setThemeMode('system', event)" title="Use system setting" aria-label="System theme">
+                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </button>
+            <button data-set="dark" onclick="setThemeMode('dark', event)" title="Dark theme" aria-label="Dark theme">
+                <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+        </div>
+        <button class="icon-btn" id="menuBtn" onclick="toggleMenu()" title="Menu">☰</button>
+    </div>
+</nav>
+
+<!-- ===== Hero section ===== -->
+<section class="hero">
+    <!-- Faint grid that fades out towards the edges -->
+    <div class="hero-grid" aria-hidden="true"></div>
+
+    <div class="hero-text">
+        <div class="status-pill rise" style="--d: 0"><span class="dot"></span> Open to internships</div>
+
+        <p class="greeting rise" id="greeting" style="--d: 1">Hi, I'm</p>
+
+        <!-- Each line of the name slides up from behind a mask -->
+        <h1 class="hero-name">
+            <span class="line"><span style="--d: 2">Zeeba</span></span>
+            <span class="line"><span class="accent" style="--d: 3">Reshamwale</span></span>
+        </h1>
+
+        <!-- The word in the slot changes every few seconds (script.js) -->
+        <p class="role rise" style="--d: 4">
+            <span class="role-bar"></span>
+            <span class="role-word" id="roleWord">Upcoming Software Engineer</span>
+        </p>
+
+        <p class="hero-intro rise" style="--d: 5">
+            I like turning ideas into clean, reliable software, and I use AI
+            to learn faster and build smarter.
+        </p>
+
+        <div class="hero-cta rise" style="--d: 6">
+            <a href="resume.html" class="btn-primary">
+                View Resume
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a href="contact.html" class="btn-ghost">Get in touch</a>
+        </div>
+
+        <ul class="hero-meta rise" style="--d: 7">
+            <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+                Hubli, Karnataka
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+                B.E. Computer Science
+            </li>
+        </ul>
+    </div>
+
+    <!-- Monogram card with a rotating gradient border; tilts with the mouse -->
+    <div class="hero-visual rise" style="--d: 3" id="heroVisual">
+        <div class="avatar-glow" aria-hidden="true"></div>
+        <div class="avatar-card" id="avatarCard">
+            <span class="avatar-initials">ZR</span>
+            <span class="avatar-caption">&lt;/&gt; Computer Science</span>
+        </div>
+        <span class="float-chip chip-1">Python</span>
+        <span class="float-chip chip-2">JavaScript</span>
+        <span class="float-chip chip-3"><span class="spark">✦</span> AI</span>
+    </div>
+</section>
+
+<!-- ===== Scrolling strip of technologies (pauses on hover) ===== -->
+<section class="marquee" aria-label="Technologies I work with">
+    <div class="marquee-track">
+        <ul><li>Python</li><li>Java</li><li>C</li><li>JavaScript</li><li>TypeScript</li><li>React</li><li>Ionic</li><li>Capacitor</li><li>HTML5</li><li>CSS3</li><li>SQL</li><li>MongoDB</li><li>Git</li><li>AI &amp; LLMs</li></ul>
+        <ul aria-hidden="true"><li>Python</li><li>Java</li><li>C</li><li>JavaScript</li><li>TypeScript</li><li>React</li><li>Ionic</li><li>Capacitor</li><li>HTML5</li><li>CSS3</li><li>SQL</li><li>MongoDB</li><li>Git</li><li>AI &amp; LLMs</li></ul>
+    </div>
+</section>
+
+<main class="container">
+
+    <!-- ===== Bento grid: about me, what I'm doing now, local time ===== -->
+    <section class="bento">
+        <article class="card reveal bento-about">
+            <h2>About Me</h2>
+            <p>
+                I am an upcoming Software Engineer, currently pursuing a Bachelor of Engineering (B.E.)
+                in Computer Science at Jain College of Engineering &amp; Technology, Hubballi.
+                I enjoy building user-friendly, reliable applications and am developing a strong
+                foundation in clean code, responsive design and problem-solving.
+            </p>
+            <p>
+                I am growing up as a developer in the age of AI, where the way software is built
+                is changing faster than ever. Rather than just keeping up, I embrace it: I use
+                AI tools to learn faster, prototype ideas and write better code, while making sure
+                I understand the fundamentals behind every solution.
+            </p>
+            <p>
+                Adaptable and curious, I am looking for internships and opportunities where I can
+                learn from experienced engineers, work with modern technologies and turn ideas
+                into real impact.
+            </p>
+        </article>
+
+        <article class="card reveal bento-now">
+            <p class="eyebrow"><span class="live-dot"></span> Right now</p>
+            <ul class="now-list">
+                <li><span>Studying</span> B.E. Computer Science</li>
+                <li><span>Exploring</span> AI tools &amp; LLMs</li>
+                <li><span>Building</span> Web &amp; cross-platform apps</li>
+                <li><span>Open to</span> Internships</li>
+            </ul>
+        </article>
+
+        <!-- Live clock (script.js) -->
+        <article class="card reveal bento-clock">
+            <p class="eyebrow">Local time &middot; Hubballi</p>
+            <p class="clock" id="clock">--:--:--</p>
+            <p class="date-text" id="dateText"></p>
+            <p class="tz-note" id="tzNote"></p>
+        </article>
+    </section>
+
+    <!-- ===== Links to the other pages ===== -->
+    <section class="explore">
+        <div class="section-head reveal">
+            <p class="eyebrow">Explore</p>
+            <h2>Get to know me</h2>
+        </div>
+
+        <div class="link-grid reveal stagger">
+            <a class="card link-card" href="resume.html">
+                <span class="link-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
+                <h3>Resume</h3>
+                <p>Education, skills, projects and achievements.</p>
+                <span class="link-arrow">View resume <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="card link-card" href="biodata.html">
+                <span class="link-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16.5a3.4 3.4 0 0 1 6.4 0M14.5 10h4M14.5 13.5h4"/></svg></span>
+                <h3>Bio-data</h3>
+                <p>Personal and family details in a printable format.</p>
+                <span class="link-arrow">View bio-data <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+            <a class="card link-card" href="contact.html">
+                <span class="link-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+                <h3>Contact</h3>
+                <p>Have an opportunity or a question? Send me a message.</p>
+                <span class="link-arrow">Get in touch <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+        </div>
+    </section>
+
+</main>
+
+<!-- ===== Footer ===== -->
+<footer>
+    <p>&copy; <span id="year">2026</span> Zeeba Reshamwale. All rights reserved.</p>
+    <p>Made with <span class="heart">♥</span> using HTML, CSS &amp; JavaScript</p>
+</footer>
+
+<button id="topBtn" title="Back to top">↑</button>
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

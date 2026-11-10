@@ -1,0 +1,2459 @@
+/* =========================================================
+   Personal Website - Stylesheet
+   Web Technology Lab - Assignment 1
+   ---------------------------------------------------------
+   Design: "Glassmorphism" - frosted glass cards floating over
+   glowing gradient blobs, with a Light and a Dark theme.
+
+   Features used:
+   - CSS variables (custom properties) for the two themes
+   - backdrop-filter (frosted glass effect)
+   - Gradient text, conic-gradient ring, glow shadows
+   - Flexbox and CSS Grid layouts
+   - Keyframe animations, transitions and hover effects
+   - Responsive design using media queries
+   - Print stylesheet for printing the resume / bio-data
+   ========================================================= */
+
+/* ---------- 1. Theme colours ---------- */
+
+/* LIGHT theme (default) */
+:root {
+    --primary: #7c3aed;                 /* violet */
+    --secondary: #0891b2;               /* cyan */
+    --pink: #db2777;
+    --gradient: linear-gradient(135deg, #7c3aed, #06b6d4);
+    --gradient-text: linear-gradient(90deg, #7c3aed, #db2777, #0891b2);
+    --gradient-loop: linear-gradient(90deg, #7c3aed, #db2777, #0891b2, #7c3aed);
+
+    --bg: #f5f3ff;
+    --text: #1e1b4b;
+    --muted: #64748b;
+    --card: rgba(255, 255, 255, 0.62);
+    --card-border: rgba(255, 255, 255, 0.9);
+    --nav-bg: rgba(255, 255, 255, 0.65);
+    --input-bg: rgba(255, 255, 255, 0.75);
+    --row-alt: rgba(124, 58, 237, 0.05);
+    --track: rgba(124, 58, 237, 0.12);
+    --shadow: 0 10px 35px rgba(76, 29, 149, 0.12);
+    --glow: 0 0 25px rgba(124, 58, 237, 0.35);
+    --blob-opacity: 0.45;
+    --dot: rgba(30, 27, 75, 0.07);
+    --radius: 20px;
+    color-scheme: light;
+}
+
+/* DARK theme - applied when <html data-theme="dark"> */
+[data-theme="dark"] {
+    --primary: #a78bfa;
+    --secondary: #22d3ee;
+    --pink: #f472b6;
+    --gradient: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    --gradient-text: linear-gradient(90deg, #c4b5fd, #f472b6, #67e8f9);
+    --gradient-loop: linear-gradient(90deg, #c4b5fd, #f472b6, #67e8f9, #c4b5fd);
+
+    --bg: #07061a;
+    --text: #e5e7f5;
+    --muted: #9aa0b8;
+    --card: rgba(22, 20, 50, 0.55);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --nav-bg: rgba(12, 10, 32, 0.6);
+    --input-bg: rgba(255, 255, 255, 0.04);
+    --row-alt: rgba(255, 255, 255, 0.03);
+    --track: rgba(255, 255, 255, 0.08);
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+    --glow: 0 0 30px rgba(139, 92, 246, 0.55);
+    --blob-opacity: 0.32;
+    --dot: rgba(255, 255, 255, 0.05);
+    color-scheme: dark;
+}
+
+/* ---------- 2. Base styles ---------- */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+    line-height: 1.65;
+    /* dotted grid pattern on top of the base colour */
+    background-color: var(--bg);
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 22px 22px;
+    transition: background-color 0.4s, color 0.4s;
+    overflow-x: hidden;
+}
+
+/* Two big blurred colour blobs that slowly move in the background */
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    z-index: -1;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    filter: blur(110px);
+    opacity: var(--blob-opacity);
+    pointer-events: none;
+    transition: opacity 0.4s;
+}
+
+body::before {
+    background: #8b5cf6;
+    top: -160px;
+    left: -140px;
+    animation: drift 18s ease-in-out infinite alternate;
+}
+
+body::after {
+    background: #06b6d4;
+    bottom: -180px;
+    right: -140px;
+    animation: drift 22s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes drift {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(120px, 80px) scale(1.15); }
+    100% { transform: translate(-60px, 140px) scale(0.95); }
+}
+
+::selection {
+    background: var(--primary);
+    color: #fff;
+}
+
+/* Custom scrollbar (Chrome / Edge / Safari) */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--gradient);
+    border-radius: 10px;
+}
+
+a {
+    color: var(--primary);
+}
+
+/* Text filled with a gradient */
+.gradient-text,
+.page-header h1 {
+    /* same first and last colour, so the moving gradient has no seam */
+    background: var(--gradient-loop);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 6s linear infinite;
+}
+
+@keyframes shine {
+    to { background-position: 200% center; }
+}
+
+h2 {
+    font-size: 1.35rem;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Small glowing gradient pill before every section heading */
+h2::before {
+    content: "";
+    width: 8px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--gradient);
+    box-shadow: var(--glow);
+}
+
+/* ---------- 3. Navigation bar (floating glass pill) ---------- */
+nav {
+    position: sticky;
+    top: 14px;
+    z-index: 100;
+    width: min(1100px, 94%);
+    margin: 14px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 10px 22px;
+    background: var(--nav-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow);
+    transition: top 0.3s, box-shadow 0.3s, background-color 0.4s;
+    animation: navIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes navIn {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+}
+
+/* Added by script.js once the page is scrolled */
+nav.scrolled {
+    top: 8px;
+    box-shadow: 0 14px 40px -14px rgba(0, 0, 0, 0.5);
+}
+
+/* Logo: gradient monogram + first name */
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.logo-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: var(--gradient);
+    box-shadow: var(--glow);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo:hover .logo-mark {
+    transform: rotate(-14deg) scale(1.08);
+}
+
+.logo-text {
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.nav-links {
+    position: relative;
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    position: relative;
+    color: var(--text);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background-color 0.25s, color 0.25s;
+}
+
+.nav-links a:hover {
+    background-color: var(--track);
+}
+
+.nav-links a {
+    display: block;
+    z-index: 1;
+}
+
+/* The current page link (class added by JavaScript):
+   bold text with a small gradient dot underneath */
+.nav-links a.active {
+    font-weight: 600;
+}
+
+.nav-links a.active::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gradient);
+    transform: translateX(-50%);
+}
+
+/* Soft highlight that slides to whichever link is hovered
+   (created and moved by script.js) */
+.nav-pill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 999px;
+    background: var(--track);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.2s;
+}
+
+.nav-links.has-pill a:hover {
+    background-color: transparent;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Theme switcher - three buttons: Light / System / Dark.
+   A gradient "bubble" slides behind the selected one.
+   <html data-mode="..."> holds the user's choice,
+   <html data-theme="..."> holds the theme actually shown. */
+.theme-toggle {
+    position: relative;
+    display: flex;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--track);
+    border: 1px solid var(--card-border);
+}
+
+.theme-toggle button {
+    position: relative;
+    z-index: 1;
+    width: 34px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s;
+}
+
+.theme-toggle button:hover {
+    color: var(--text);
+}
+
+.theme-toggle svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.theme-indicator {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 34px;
+    height: 30px;
+    border-radius: 999px;
+    background: var(--gradient);
+    box-shadow: var(--glow);
+    /* "back-out" curve gives a small bounce when it slides */
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+[data-mode="system"] .theme-indicator { transform: translateX(34px); }
+[data-mode="dark"]   .theme-indicator { transform: translateX(68px); }
+
+/* Selected icon turns white and spins in */
+[data-mode="light"]  .theme-toggle [data-set="light"],
+[data-mode="system"] .theme-toggle [data-set="system"],
+[data-mode="dark"]   .theme-toggle [data-set="dark"] {
+    color: #fff;
+}
+
+[data-mode="light"]  .theme-toggle [data-set="light"] svg,
+[data-mode="system"] .theme-toggle [data-set="system"] svg,
+[data-mode="dark"]   .theme-toggle [data-set="dark"] svg {
+    animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes iconPop {
+    from { transform: rotate(-120deg) scale(0.3); opacity: 0; }
+    to   { transform: rotate(0) scale(1); opacity: 1; }
+}
+
+/* Theme change animation 1: circle reveal (View Transitions API).
+   JavaScript grows a circle from the clicked button. */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+/* Theme change animation 2 (fallback): smooth colour fade */
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+    transition: background-color 0.5s ease, color 0.5s ease,
+                border-color 0.5s ease, box-shadow 0.5s ease !important;
+}
+
+.icon-btn {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Hamburger button only shows on small screens */
+#menuBtn {
+    display: none;
+}
+
+/* ---------- 4. Page header ---------- */
+.page-header {
+    text-align: center;
+    padding: 70px 20px 20px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+}
+
+/* ---------- 5. Glass cards ---------- */
+.container {
+    width: min(1000px, 92%);
+    margin: 30px auto;
+}
+
+.card {
+    position: relative;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    padding: 30px;
+    margin-bottom: 24px;
+    transition: background-color 0.4s, border-color 0.3s, transform 0.3s;
+}
+
+/* Spotlight that follows the mouse (position set by JavaScript) */
+.card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%),
+                rgba(139, 92, 246, 0.14), transparent 60%);
+}
+
+.card:hover::after {
+    opacity: 1;
+}
+
+.card:hover {
+    border-color: rgba(139, 92, 246, 0.45);
+}
+
+/* ---------- 6. Home page - hero ---------- */
+
+/* Lets the gradient border angle be animated smoothly */
+@property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.hero {
+    /* hero-only colours */
+    --line: rgba(30, 27, 75, 0.14);
+    --grid-line: rgba(124, 58, 237, 0.07);
+    --avatar-bg: #ffffff;
+
+    position: relative;
+    width: min(1100px, 92%);
+    margin: 0 auto;
+    padding: 90px 0 70px;
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    align-items: center;
+    gap: 48px;
+}
+
+[data-theme="dark"] .hero {
+    --line: rgba(255, 255, 255, 0.12);
+    --grid-line: rgba(255, 255, 255, 0.045);
+    --avatar-bg: #0c0a22;
+}
+
+/* Faint line grid behind the hero, faded out at the edges */
+.hero-grid {
+    position: absolute;
+    inset: -60px -8vw 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%);
+    mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%);
+}
+
+/* Entrance animation: each item fades up out of a blur, one after another.
+   --d (set in the HTML) is the item's position in the sequence. */
+.rise,
+.hero-name .line > span {
+    animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--d, 0) * 90ms + 100ms);
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+        filter: blur(8px);
+    }
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.status-pill .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    70%  { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.greeting {
+    margin: 22px 0 4px;
+    color: var(--muted);
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+
+/* Big name; each line is revealed by sliding up inside a mask */
+.hero-name {
+    margin: 0 0 18px;
+    font-size: clamp(2.9rem, 7.2vw, 5.4rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: var(--text);
+}
+
+.hero-name .line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+}
+
+.hero-name .line > span {
+    display: inline-block;
+    animation-name: lift;
+}
+
+@keyframes lift {
+    from { transform: translateY(105%); }
+}
+
+.hero-name .accent {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Rotating role line */
+.role {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 1.6em;
+    margin: 0 0 16px;
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+    font-weight: 600;
+}
+
+.role-bar {
+    flex: none;
+    width: 28px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--gradient);
+}
+
+.role-word {
+    display: inline-block;
+}
+
+.hero-intro {
+    max-width: 46ch;
+    margin: 0 0 30px;
+    color: var(--muted);
+    font-size: 1.05rem;
+}
+
+/* Hero buttons */
+.hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.btn-primary,
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 24px;
+    border-radius: 12px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s, background-color 0.25s;
+}
+
+.btn-primary {
+    background: var(--text);
+    color: var(--bg);
+    box-shadow: 0 10px 30px -12px rgba(124, 58, 237, 0.7);
+}
+
+.btn-primary svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.25s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px -12px rgba(124, 58, 237, 0.9);
+}
+
+.btn-primary:hover svg {
+    transform: translateX(4px);
+}
+
+.btn-ghost {
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-ghost:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+/* Location / degree row */
+.hero-meta {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.hero-meta li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-meta svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Circular monogram avatar on the right */
+.hero-visual {
+    position: relative;
+    justify-self: center;
+    width: min(340px, 100%);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    perspective: 900px;
+}
+
+/* Soft colourful glow behind the card that slowly turns */
+.avatar-glow {
+    position: absolute;
+    inset: 14%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #7c3aed, #ec4899, #06b6d4, #7c3aed);
+    filter: blur(60px);
+    opacity: 0.45;
+    animation: spin 14s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Circle with a gradient ring that travels around the edge.
+   --rx / --ry (tilt) and --gx / --gy (shine position) come from script.js */
+.avatar-card {
+    position: relative;
+    width: 72%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background:
+        linear-gradient(var(--avatar-bg), var(--avatar-bg)) padding-box,
+        conic-gradient(from var(--angle), #7c3aed, #ec4899, #06b6d4, #7c3aed) border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.5);
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: borderSpin 6s linear infinite;
+}
+
+@keyframes borderSpin {
+    to { --angle: 360deg; }
+}
+
+/* Light reflection that follows the mouse */
+.avatar-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--gx, 30%) var(--gy, 20%),
+                rgba(255, 255, 255, 0.14), transparent 55%);
+}
+
+.avatar-initials {
+    font-size: clamp(3.6rem, 8vw, 5rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transform: translateZ(40px);
+}
+
+.avatar-caption {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    transform: translateZ(25px);
+}
+
+/* Small glass tags floating around the card */
+.float-chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow);
+    animation: float 6s ease-in-out infinite;
+}
+
+.chip-1 { top: 8%;     left: -4%; }
+.chip-2 { bottom: 12%; left: -8%;  animation-delay: -2s; }
+.chip-3 { top: 26%;    right: -6%; animation-delay: -4s; }
+
+.spark {
+    color: var(--pink);
+}
+
+@keyframes float {
+    50% { transform: translateY(-10px); }
+}
+
+/* ---------- 7. Buttons ---------- */
+.btn {
+    display: inline-block;
+    background: var(--gradient);
+    color: #fff;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: var(--glow);
+    transition: transform 0.25s, box-shadow 0.25s, filter 0.25s;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+}
+
+.btn.outline {
+    background: transparent;
+    color: var(--text);
+    border: 2px solid var(--primary);
+    box-shadow: none;
+    margin-left: 8px;
+}
+
+.btn.outline:hover {
+    background: var(--track);
+}
+
+.btn.small {
+    padding: 8px 18px;
+    font-size: 0.9rem;
+}
+
+/* ---------- 8. Home page grid cards ---------- */
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.info-card {
+    text-align: center;
+}
+
+.info-card:hover {
+    transform: translateY(-8px);
+}
+
+.info-card .emoji {
+    font-size: 2rem;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--track);
+}
+
+.info-card h3 {
+    margin: 14px 0 4px;
+}
+
+.info-card p {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 0.93rem;
+}
+
+/* Live clock */
+.clock {
+    font-size: clamp(2.2rem, 7vw, 3.4rem);
+    font-weight: 800;
+    text-align: center;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.date-text {
+    text-align: center;
+    color: var(--muted);
+    margin: 0;
+}
+
+/* ----- Home page: tech strip, bento grid and link cards ----- */
+
+/* Endless scrolling strip; the list is written twice so it loops seamlessly */
+.marquee {
+    width: min(1100px, 92%);
+    margin: 0 auto 36px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 32s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+.marquee ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.marquee li {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--muted);
+    transition: color 0.2s;
+}
+
+.marquee li::after {
+    content: "\2726";
+    margin: 0 30px;
+    font-size: 0.7rem;
+    color: var(--primary);
+}
+
+.marquee li:hover {
+    color: var(--text);
+}
+
+@keyframes marquee {
+    to { transform: translateX(-50%); }
+}
+
+/* Bento grid: About on the left, two small cards on the right */
+.bento {
+    display: grid;
+    grid-template-columns: 1.9fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.bento > .card {
+    margin: 0;
+}
+
+.bento-about {
+    grid-row: span 2;
+}
+
+.bento-about p {
+    color: var(--muted);
+    line-height: 1.75;
+}
+
+.bento-about p:last-child {
+    margin-bottom: 0;
+}
+
+.live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    vertical-align: middle;
+    animation: pulse 1.8s infinite;
+}
+
+.now-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.now-list li {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-weight: 500;
+}
+
+.now-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.now-list span {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.bento-clock .clock {
+    margin: 10px 0 2px;
+    text-align: left;
+    font-size: clamp(1.8rem, 3.6vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.bento-clock .date-text {
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+/* "Same time zone as you" / "5h 30m ahead of you" */
+.tz-note {
+    display: inline-block;
+    margin: 12px 0 0;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    background: var(--track);
+}
+
+.tz-note:empty {
+    display: none;
+}
+
+/* "Explore" section */
+.section-head {
+    margin: 48px 0 18px;
+}
+
+.section-head h2 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.link-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.link-card {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--text);
+    text-decoration: none;
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.link-card:hover {
+    transform: translateY(-6px);
+}
+
+.link-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+    background: var(--track);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s, color 0.3s;
+}
+
+.link-card:hover .link-icon {
+    color: #fff;
+    background: var(--gradient);
+    transform: rotate(-8deg) scale(1.06);
+}
+
+.link-icon svg,
+.link-arrow svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.link-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.link-card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.link-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.93rem;
+}
+
+.link-arrow {
+    margin-top: auto;
+    padding-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.link-arrow svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    transition: transform 0.25s;
+}
+
+.link-card:hover .link-arrow svg {
+    transform: translateX(5px);
+}
+
+/* ---------- 9. Resume page ---------- */
+.contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    color: var(--muted);
+}
+
+.contact-row b {
+    color: var(--text);
+}
+
+/* Education timeline */
+.timeline {
+    position: relative;
+    margin: 0 0 24px 10px;
+    padding-left: 28px;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--gradient);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 22px;
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -35px;
+    top: 6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--primary);
+    box-shadow: var(--glow);
+}
+
+.timeline-item h3 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.timeline-item .meta {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin: 2px 0 0;
+}
+
+/* Marks line under each qualification */
+.timeline-item .score {
+    margin: 6px 0 0;
+    font-size: 0.95rem;
+}
+
+.timeline-item .score b {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 1.1rem;
+}
+
+.badge {
+    display: inline-block;
+    background: var(--gradient);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* Skill progress bars */
+.skill {
+    margin-bottom: 16px;
+}
+
+.skill-label {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.skill-label span:last-child {
+    color: var(--muted);
+}
+
+.skill-bar {
+    background: var(--track);
+    height: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Width starts at 0 and is animated by JavaScript when visible */
+.skill-fill {
+    position: relative;
+    height: 100%;
+    width: 0;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #7c3aed, #ec4899, #06b6d4);
+    box-shadow: var(--glow);
+    transition: width 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+}
+
+/* Moving shine on the skill bar */
+.skill-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 2.5s infinite;
+}
+
+@keyframes shimmer {
+    to { transform: translateX(100%); }
+}
+
+/* Project cards */
+.project {
+    border: 1px solid var(--card-border);
+    background: var(--input-bg);
+    border-radius: 16px;
+    padding: 20px;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.project:hover {
+    transform: translateY(-6px);
+    border-color: var(--primary);
+    box-shadow: var(--glow);
+}
+
+/* Keep the tags lined up at the bottom of each project card */
+.project {
+    display: flex;
+    flex-direction: column;
+}
+
+.project .tags {
+    margin-top: auto;
+}
+
+.project h3 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    color: var(--primary);
+}
+
+.project p {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.tags span {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--primary);
+    background: var(--track);
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin: 2px 2px 0 0;
+}
+
+/* Lists with gradient tick marks */
+.tick-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tick-list li {
+    padding: 7px 0 7px 34px;
+    position: relative;
+}
+
+.tick-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gradient);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Grouped skills on the resume page */
+.skill-group {
+    margin-bottom: 20px;
+}
+
+.skill-group:last-child {
+    margin-bottom: 0;
+}
+
+.skill-group h3 {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chips span {
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.chips span:hover {
+    transform: scale(1.06);
+    border-color: var(--primary);
+}
+
+/* ----- Resume page redesign ----- */
+:root {
+    --line: rgba(30, 27, 75, 0.12);
+}
+
+[data-theme="dark"] {
+    --line: rgba(255, 255, 255, 0.1);
+}
+
+/* Reading progress bar fixed to the top of the window */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 300;
+    width: 100%;
+    height: 3px;
+    background: var(--gradient);
+    transform: scaleX(0);
+    transform-origin: left;
+    pointer-events: none;
+}
+
+/* Profile header */
+.profile {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 28px;
+    padding: 60px 0 36px;
+}
+
+.profile-avatar {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background:
+        linear-gradient(var(--bg), var(--bg)) padding-box,
+        conic-gradient(from var(--angle), #7c3aed, #ec4899, #06b6d4, #7c3aed) border-box;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--glow);
+    animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both, borderSpin 6s linear infinite;
+    animation-delay: 100ms, 0s;
+}
+
+.profile-avatar span {
+    font-size: 2.3rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.eyebrow {
+    margin: 0 0 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.profile-name {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+}
+
+.profile-role {
+    margin: 6px 0 14px;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.profile-contact {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-contact li,
+.profile-contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.86rem;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.profile-contact li {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.profile-contact li:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.profile-contact svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* .btn-primary is also used as a <button> here */
+button.btn-primary {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.profile-print {
+    align-self: start;
+    margin-top: 8px;
+}
+
+.profile-print svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.25s;
+}
+
+.profile-print:hover svg {
+    transform: translateY(2px);
+}
+
+/* Highlight numbers */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.stat {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 20px 22px;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.stat:hover {
+    transform: translateY(-4px);
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* Soft glow in the corner of each stat */
+.stat::after {
+    content: "";
+    position: absolute;
+    right: -30px;
+    top: -30px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: var(--gradient);
+    opacity: 0.18;
+    filter: blur(20px);
+}
+
+.stat-num {
+    font-size: clamp(1.7rem, 3.5vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* Career objective text */
+.lead {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+/* Timeline: the line draws itself downwards, entries become cards */
+.timeline::before {
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+
+.reveal.visible .timeline::before {
+    transform: scaleY(1);
+}
+
+.timeline-item {
+    padding: 16px 20px;
+    border-radius: 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    transition: transform 0.3s, border-color 0.3s;
+}
+
+.timeline-item:hover {
+    transform: translateX(6px);
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+.timeline-item::before {
+    top: 22px;
+}
+
+/* Projects: numbered, with a gradient bar that sweeps in on hover */
+.projects {
+    counter-reset: project;
+}
+
+.projects .project {
+    position: relative;
+    overflow: hidden;
+}
+
+.projects .project::before {
+    counter-increment: project;
+    content: counter(project, decimal-leading-zero);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+
+.projects .project::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--gradient);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.projects .project:hover::after {
+    transform: scaleX(1);
+}
+
+/* Items inside a .stagger list appear one after another
+   (--i is set for each item by script.js) */
+.reveal.visible .stagger > *,
+.reveal.visible.stagger > * {
+    animation: tileIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms + 150ms);
+}
+
+/* ---------- 10. Tables ---------- */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+}
+
+th,
+td {
+    padding: 13px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--card-border);
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+thead th {
+    background: var(--gradient);
+    color: #fff;
+    font-weight: 600;
+}
+
+tbody tr:nth-child(even) {
+    background: var(--row-alt);
+}
+
+tbody tr {
+    transition: background-color 0.2s;
+}
+
+tbody tr:hover {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.biodata th {
+    width: 34%;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.biodata-top {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.biodata-top table {
+    flex: 1;
+}
+
+.photo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.photo-box {
+    width: 150px;
+    height: 180px;
+    border: 2px dashed var(--primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    background-color: var(--input-bg);
+    background-size: cover;
+    background-position: center;
+}
+
+/* Animated avatar shown in the photo box until a photo is added */
+.avatar-bot {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.avatar-bot svg {
+    width: 100%;
+    max-height: 135px;
+    overflow: visible;
+}
+
+.avatar-bot svg * {
+    transform-box: fill-box;
+}
+
+/* Head gently bobs */
+.ab-head {
+    transform-origin: center bottom;
+    animation: abBob 4s ease-in-out infinite;
+}
+
+@keyframes abBob {
+    50% { transform: translateY(-3px) rotate(-3deg); }
+}
+
+/* Eyes blink every few seconds */
+.ab-eye {
+    transform-origin: center;
+    animation: abBlink 5s infinite;
+}
+
+@keyframes abBlink {
+    0%, 45%, 49%, 100% { transform: scaleY(1); }
+    47%                { transform: scaleY(0.1); }
+}
+
+.ab-pupil {
+    transition: transform 0.12s ease-out;
+}
+
+/* Hover: bigger smile and blushing cheeks */
+.ab-cheek,
+.ab-smile-big {
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.ab-smile {
+    transition: opacity 0.25s;
+}
+
+.avatar-bot:hover .ab-cheek    { opacity: 0.45; }
+.avatar-bot:hover .ab-smile    { opacity: 0; }
+.avatar-bot:hover .ab-smile-big { opacity: 1; }
+
+/* Click: wink and a little bounce */
+.avatar-bot.wink .ab-eye-left {
+    animation: none;
+    transform: scaleY(0.1);
+}
+
+.avatar-bot.wink svg {
+    animation: abBounce 0.55s ease;
+}
+
+@keyframes abBounce {
+    30% { transform: translateY(-8px); }
+    60% { transform: translateY(0); }
+    80% { transform: translateY(-3px); }
+}
+
+.avatar-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+/* Once a photo is shown: solid gradient frame instead of the dashed box */
+.photo-box.has-photo {
+    border: none;
+    box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--primary), var(--glow);
+}
+
+.signature-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.signature-row p {
+    margin: 4px 0;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+/* Bio-data as info tiles (screen only - printing keeps the classic table) */
+.biodata {
+    --tile-line: rgba(30, 27, 75, 0.1);
+}
+
+[data-theme="dark"] .biodata {
+    --tile-line: rgba(255, 255, 255, 0.08);
+}
+
+@media screen {
+    .biodata {
+        display: block;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+    }
+
+    .biodata tbody {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .biodata tr,
+    .biodata tbody tr:nth-child(even) {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: var(--input-bg);
+        border: 1px solid var(--tile-line);
+        transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .biodata tr.wide {
+        grid-column: 1 / -1;
+    }
+
+    .biodata tbody tr:hover {
+        background: var(--input-bg);
+        transform: translateY(-3px);
+        border-color: rgba(139, 92, 246, 0.5);
+        box-shadow: 0 14px 30px -18px rgba(124, 58, 237, 0.8);
+    }
+
+    /* Gradient accent on the left edge that grows on hover */
+    .biodata tr::before {
+        content: "";
+        position: absolute;
+        left: -1px;
+        top: 14px;
+        bottom: 14px;
+        width: 3px;
+        border-radius: 3px;
+        background: var(--gradient);
+        transform: scaleY(0);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .biodata tr:hover::before {
+        transform: scaleY(1);
+    }
+
+    .biodata th,
+    .biodata td,
+    .biodata tbody tr:last-child th,
+    .biodata tbody tr:last-child td {
+        width: auto;
+        padding: 0;
+        border: none;
+    }
+
+    /* Small uppercase label above each value */
+    .biodata th {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    .biodata td {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text);
+    }
+
+    .biodata td.big {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    /* Tiles fade up one after another when the card scrolls into view
+       (--i is set for each row by script.js) */
+    .reveal.visible .biodata tr {
+        animation: tileIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        animation-delay: calc(var(--i, 0) * 60ms + 150ms);
+    }
+
+    /* Languages and hobbies shown as pills */
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 4px !important;
+    }
+
+    .tag-list span {
+        padding: 5px 13px;
+        border-radius: 999px;
+        font-size: 0.86rem;
+        background: var(--track);
+        border: 1px solid var(--tile-line);
+        transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .tag-list span:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    /* Email / phone links with an underline that slides in */
+    .biodata td a {
+        color: var(--text);
+        text-decoration: none;
+        background-image: var(--gradient);
+        background-size: 0 2px;
+        background-repeat: no-repeat;
+        background-position: 0 100%;
+        transition: background-size 0.3s;
+    }
+
+    .biodata td a:hover {
+        background-size: 100% 2px;
+    }
+}
+
+@keyframes tileIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+/* Age badge next to the date of birth */
+.age-chip {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--gradient);
+    vertical-align: middle;
+}
+
+.age-chip:empty {
+    display: none;
+}
+
+/* ---------- 11. Contact form ---------- */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.92rem;
+    margin-bottom: 6px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: var(--input-bg);
+    color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+select option {
+    background: var(--bg);
+    color: var(--text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+
+/* Invalid field styling - class added by JavaScript validation */
+.invalid,
+[data-theme="dark"] .invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+}
+
+.error {
+    color: #ef4444;
+    font-size: 0.82rem;
+    min-height: 1.2em;
+    display: block;
+    margin-top: 2px;
+}
+
+.char-count {
+    text-align: right;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.success-box {
+    display: none;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid #10b981;
+    color: var(--text);
+    padding: 16px;
+    border-radius: 14px;
+    margin-top: 16px;
+}
+
+/* ---------- 12. Footer, back-to-top and toast ---------- */
+footer {
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: 50px;
+    color: var(--muted);
+    border-top: 1px solid var(--card-border);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+footer p {
+    margin: 4px 0;
+}
+
+footer .heart {
+    color: var(--pink);
+}
+
+#topBtn {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: var(--gradient);
+    color: #fff;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: var(--glow);
+    display: none;
+    z-index: 50;
+}
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%) translateY(140px);
+    background: var(--nav-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--text);
+    padding: 14px 26px;
+    border-radius: 999px;
+    border: 1px solid var(--primary);
+    box-shadow: var(--glow);
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    z-index: 200;
+    max-width: 90%;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Fade-in effect for cards as you scroll */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ---------- 13. Responsive design (mobile) ---------- */
+@media (max-width: 760px) {
+    #menuBtn {
+        display: block;
+    }
+
+    nav {
+        border-radius: 20px;
+    }
+
+    /* Links are hidden and drop down when the menu button is clicked */
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        padding: 10px;
+        background: var(--nav-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: var(--shadow);
+    }
+
+    .nav-links.open {
+        display: flex;
+    }
+
+    .nav-pill {
+        display: none;
+    }
+
+    .nav-links a.active {
+        background: var(--track);
+    }
+
+    .nav-links a.active::after {
+        display: none;
+    }
+
+    /* Hero: one column, text first, smaller avatar below */
+    .hero {
+        grid-template-columns: 1fr;
+        padding: 44px 0 20px;
+        gap: 24px;
+    }
+
+    .hero-visual {
+        width: min(260px, 78%);
+    }
+
+    .chip-1 { left: -10%; }
+    .chip-2 { left: -14%; }
+    .chip-3 { right: -12%; }
+
+    .btn.outline {
+        margin: 10px 0 0;
+    }
+
+    .biodata-top {
+        flex-direction: column-reverse;
+        align-items: center;
+    }
+
+    .biodata tbody {
+        grid-template-columns: 1fr;
+    }
+
+    .profile {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 36px 0 24px;
+    }
+
+    .profile-avatar {
+        width: 88px;
+        height: 88px;
+    }
+
+    .profile-print {
+        justify-self: start;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bento,
+    .link-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bento-about {
+        grid-row: auto;
+    }
+
+    .logo-text {
+        display: none;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 22px;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        font-size: 0.92rem;
+    }
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ---------- 14. Print styles (Resume / Bio-data) ---------- */
+@media print {
+    nav,
+    footer,
+    #topBtn,
+    .toolbar,
+    .toast,
+    .photo-col label {
+        display: none !important;
+    }
+
+    body {
+        background: #fff;
+        color: #000;
+    }
+
+    body::before,
+    body::after {
+        display: none;
+    }
+
+    .page-header {
+        padding: 10px;
+    }
+
+    .card {
+        box-shadow: none;
+        border: none;
+        backdrop-filter: none;
+        padding: 10px 0;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
+
+    /* Bio-data prints as a normal list: commas between pills, plain age */
+    .tag-list span:not(:last-child)::after {
+        content: ", ";
+    }
+
+    .age-chip {
+        background: none;
+        color: #000;
+        padding: 0;
+        margin-left: 4px;
+    }
+
+    .no-print,
+    .scroll-progress {
+        display: none !important;
+    }
+
+    .timeline::before {
+        transform: none;
+    }
+
+    /* Gradient text would print invisible without background graphics */
+    .stat-num,
+    .score b,
+    .profile-avatar span,
+    .page-header h1,
+    .hero-name .accent {
+        background: none !important;
+        color: #000 !important;
+    }
+
+    .profile {
+        padding: 0 0 16px;
+    }
+
+    /* Leave the photo box empty on paper so a real photo can be pasted */
+    .avatar-bot {
+        display: none;
+    }
+
+    .age-chip::before { content: "("; }
+    .age-chip::after  { content: ")"; }
+}
